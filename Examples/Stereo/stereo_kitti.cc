@@ -24,10 +24,12 @@
 #include<fstream>
 #include<iomanip>
 #include<chrono>
+#include<unistd.h>
 
 #include<opencv2/core/core.hpp>
 
 #include<System.h>
+#include "Instrumentor.h"
 
 using namespace std;
 
@@ -61,13 +63,15 @@ int main(int argc, char **argv)
     cout << "Start processing sequence ..." << endl;
     cout << "Images in the sequence: " << nImages << endl << endl;   
 
+
+    PROFILE_START_SESSION("Stereo kitti", "/orbslam_ws/ORB_SLAM2/stereokitti.json");
     // Main loop
     cv::Mat imLeft, imRight;
     for(int ni=0; ni<nImages; ni++)
     {
         // Read left and right images from file
-        imLeft = cv::imread(vstrImageLeft[ni],CV_LOAD_IMAGE_UNCHANGED);
-        imRight = cv::imread(vstrImageRight[ni],CV_LOAD_IMAGE_UNCHANGED);
+        imLeft = cv::imread(vstrImageLeft[ni],cv::IMREAD_UNCHANGED);
+        imRight = cv::imread(vstrImageRight[ni],cv::IMREAD_UNCHANGED);
         double tframe = vTimestamps[ni];
 
         if(imLeft.empty())
@@ -82,7 +86,6 @@ int main(int argc, char **argv)
 #else
         std::chrono::monotonic_clock::time_point t1 = std::chrono::monotonic_clock::now();
 #endif
-
         // Pass the images to the SLAM system
         SLAM.TrackStereo(imLeft,imRight,tframe);
 
@@ -106,7 +109,8 @@ int main(int argc, char **argv)
         if(ttrack<T)
             usleep((T-ttrack)*1e6);
     }
-
+    PROFILE_END_SESSION();
+    
     // Stop all threads
     SLAM.Shutdown();
 
@@ -147,8 +151,8 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
         }
     }
 
-    string strPrefixLeft = strPathToSequence + "/image_0/";
-    string strPrefixRight = strPathToSequence + "/image_1/";
+    string strPrefixLeft = strPathToSequence + "/image_2/";
+    string strPrefixRight = strPathToSequence + "/image_3/";
 
     const int nTimes = vTimestamps.size();
     vstrImageLeft.resize(nTimes);

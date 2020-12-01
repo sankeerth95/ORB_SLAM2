@@ -27,10 +27,11 @@
 #include "Optimizer.h"
 
 #include "ORBmatcher.h"
+#include "Instrumentor.h"
 
 #include<mutex>
 #include<thread>
-
+#include <unistd.h>
 
 namespace ORB_SLAM2
 {
@@ -66,6 +67,7 @@ void LoopClosing::Run()
             // Detect loop candidates and check covisibility consistency
             if(DetectLoop())
             {
+                PROFILE_SCOPE("Loop Correction");
                // Compute similarity transformation [sR|t]
                // In the stereo/RGBD case s=1
                if(ComputeSim3())
@@ -82,6 +84,7 @@ void LoopClosing::Run()
             break;
 
         usleep(5000);
+//        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     }
 
     SetFinish();
@@ -102,6 +105,7 @@ bool LoopClosing::CheckNewKeyFrames()
 
 bool LoopClosing::DetectLoop()
 {
+    PROFILE_FUNC();    
     {
         unique_lock<mutex> lock(mMutexLoopQueue);
         mpCurrentKF = mlpLoopKeyFrameQueue.front();
@@ -426,6 +430,7 @@ void LoopClosing::CorrectLoop()
     while(!mpLocalMapper->isStopped())
     {
         usleep(1000);
+//        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
     // Ensure current keyframe is updated
@@ -628,6 +633,7 @@ void LoopClosing::RequestReset()
             break;
         }
         usleep(5000);
+//        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     }
 }
 
@@ -668,6 +674,7 @@ void LoopClosing::RunGlobalBundleAdjustment(unsigned long nLoopKF)
             while(!mpLocalMapper->isStopped() && !mpLocalMapper->isFinished())
             {
                 usleep(1000);
+//                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             }
 
             // Get Map Mutex

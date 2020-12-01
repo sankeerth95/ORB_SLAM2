@@ -22,6 +22,7 @@
 
 #include "KeyFrame.h"
 #include "Thirdparty/DBoW2/DBoW2/BowVector.h"
+#include "Instrumentor.h"
 
 #include<mutex>
 
@@ -75,6 +76,7 @@ void KeyFrameDatabase::clear()
 
 vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF, float minScore)
 {
+    PROFILE_FUNC();
     set<KeyFrame*> spConnectedKeyFrames = pKF->GetConnectedKeyFrames();
     list<KeyFrame*> lKFsSharingWords;
 
@@ -198,6 +200,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF, float mi
 
 vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
 {
+    PROFILE_FUNC();
     list<KeyFrame*> lKFsSharingWords;
 
     // Search all keyframes that share a word with current frame

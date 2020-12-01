@@ -22,6 +22,7 @@
 #include <pangolin/pangolin.h>
 
 #include <mutex>
+#include <unistd.h>
 
 namespace ORB_SLAM2
 {
@@ -158,6 +159,7 @@ void Viewer::Run()
             while(isStopped())
             {
                 usleep(3000);
+//                std::this_thread::sleep_for(std::chrono::milliseconds(3000));
             }
         }
 
