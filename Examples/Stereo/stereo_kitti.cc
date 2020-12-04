@@ -18,6 +18,7 @@
 * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <include/MemoryTracker.h>
 
 #include<iostream>
 #include<algorithm>
@@ -65,6 +66,8 @@ int main(int argc, char **argv)
 
 
     PROFILE_START_SESSION("Stereo kitti", "/orbslam_ws/ORB_SLAM2/stereokitti.json");
+
+    PublishThread::Get().BeginSession();
     // Main loop
     cv::Mat imLeft, imRight;
     for(int ni=0; ni<nImages; ni++)
@@ -109,6 +112,9 @@ int main(int argc, char **argv)
         if(ttrack<T)
             usleep((T-ttrack)*1e6);
     }
+
+    PublishThread::Get().EndSession();
+
     PROFILE_END_SESSION();
     
     // Stop all threads

@@ -38,13 +38,13 @@ struct InstrumentationSession
 class Instrumentor
 {
 private:
-    InstrumentationSession* m_CurrentSession;
+//    InstrumentationSession* m_CurrentSession;
     std::ofstream m_OutputStream;
     std::mutex m;
     int m_ProfileCount;
 public:
     Instrumentor()
-        : m_CurrentSession(nullptr), m_ProfileCount(0)
+        : m_ProfileCount(0)//, m_CurrentSession(nullptr)
     {
     }
 
@@ -52,15 +52,15 @@ public:
     {
         m_OutputStream.open(filepath);
         WriteHeader();
-        m_CurrentSession = new InstrumentationSession{ name };
+//        m_CurrentSession = new InstrumentationSession{ name };
     }
 
     void EndSession()
     {
         WriteFooter();
         m_OutputStream.close();
-        delete m_CurrentSession;
-        m_CurrentSession = nullptr;
+//        delete m_CurrentSession;
+ //       m_CurrentSession = nullptr;
         m_ProfileCount = 0;
     }
 
