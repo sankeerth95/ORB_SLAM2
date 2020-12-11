@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.16)
 project(ORB_SLAM2)
 
 IF(NOT CMAKE_BUILD_TYPE)
@@ -77,7 +77,9 @@ src/KeyFrameDatabase.cc
 src/Sim3Solver.cc
 src/Initializer.cc
 src/Viewer.cc
-        include/MemoryTracker.h)
+src/MemoryTracker.cpp)
+target_precompile_headers(${PROJECT_NAME} PUBLIC pch/orbpch.h)
+
 
 target_link_libraries(${PROJECT_NAME}
 ${OpenCV_LIBS}
@@ -100,6 +102,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Stereo)
 add_executable(stereo_kitti
 Examples/Stereo/stereo_kitti.cc)
 target_link_libraries(stereo_kitti ${PROJECT_NAME})
+target_precompile_headers(stereo_kitti PUBLIC pch/orbpch.h)
 
 add_executable(stereo_euroc
 Examples/Stereo/stereo_euroc.cc)

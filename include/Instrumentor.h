@@ -13,7 +13,8 @@
 // You will probably want to macro-fy this, to switch on/off easily and use things like __FUNCSIG__ for the profile name.
 //
 
-#pragma once
+#ifndef INSTRUMENTOR_H
+#define INSTRUMENTOR_H
 
 #include <string>
 #include <chrono>
@@ -155,7 +156,6 @@ private:
     #define PROFILE_END_SESSION() 
     #define PROFILE_SCOPE(name);
     #define PROFILE_FUNC() 
-#endif
+#endif //PROFILE
 
-
-
+#endif //INSTRUMENTOR_H

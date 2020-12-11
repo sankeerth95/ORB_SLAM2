@@ -117,10 +117,10 @@ long unsigned int Map::GetMaxKFid()
 
 void Map::clear()
 {
-    for(set<MapPoint*>::iterator sit=mspMapPoints.begin(), send=mspMapPoints.end(); sit!=send; sit++)
+    for(MapPointSet::iterator sit=mspMapPoints.begin(), send=mspMapPoints.end(); sit!=send; sit++)
         delete *sit;
 
-    for(set<KeyFrame*>::iterator sit=mspKeyFrames.begin(), send=mspKeyFrames.end(); sit!=send; sit++)
+    for(KeyFrameSet::iterator sit=mspKeyFrames.begin(), send=mspKeyFrames.end(); sit!=send; sit++)
         delete *sit;
 
     mspMapPoints.clear();

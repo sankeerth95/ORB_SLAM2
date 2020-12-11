@@ -22,7 +22,7 @@
 #include "Converter.h"
 #include "ORBmatcher.h"
 #include <thread>
-#include <Instrumentor.h>
+#include "Instrumentor.h"
 
 namespace ORB_SLAM2
 {

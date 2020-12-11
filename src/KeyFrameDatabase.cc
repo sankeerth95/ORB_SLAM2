@@ -18,7 +18,7 @@
 * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <include/MemoryTracker.h>
+#include "MemoryTracker.h"
 
 #include "KeyFrameDatabase.h"
 
@@ -46,7 +46,7 @@ void KeyFrameDatabase::add(KeyFrame *pKF) {
     for (DBoW2::BowVector::const_iterator vit = pKF->mBowVec.begin(), vend = pKF->mBowVec.end(); vit != vend; vit++)
     {
         mvInvertedFile[vit->first].push_back(pKF);
-        MemTracker::UpdateBytes(sizeof(KeyFrame));
+//        MemTracker::UpdateBytes(sizeof(KeyFrame));
     }
 }
 
@@ -58,7 +58,7 @@ void KeyFrameDatabase::erase(KeyFrame* pKF)
     for(DBoW2::BowVector::const_iterator vit=pKF->mBowVec.begin(), vend=pKF->mBowVec.end(); vit!=vend; vit++)
     {
         // List of keyframes that share the word
-        list<KeyFrame*> &lKFs =   mvInvertedFile[vit->first];
+        invertedFileList &lKFs =   mvInvertedFile[vit->first];
 
         for(list<KeyFrame*>::iterator lit=lKFs.begin(), lend= lKFs.end(); lit!=lend; lit++)
         {
@@ -91,7 +91,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF, float mi
 
         for(DBoW2::BowVector::const_iterator vit=pKF->mBowVec.begin(), vend=pKF->mBowVec.end(); vit != vend; vit++)
         {
-            list<KeyFrame*> &lKFs =   mvInvertedFile[vit->first];
+            invertedFileList &lKFs =   mvInvertedFile[vit->first];
 
             for(list<KeyFrame*>::iterator lit=lKFs.begin(), lend= lKFs.end(); lit!=lend; lit++)
             {
@@ -213,7 +213,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame *F)
 
         for(DBoW2::BowVector::const_iterator vit=F->mBowVec.begin(), vend=F->mBowVec.end(); vit != vend; vit++)
         {
-            list<KeyFrame*> &lKFs =   mvInvertedFile[vit->first];
+            invertedFileList &lKFs =   mvInvertedFile[vit->first];
 
             for(list<KeyFrame*>::iterator lit=lKFs.begin(), lend= lKFs.end(); lit!=lend; lit++)
             {

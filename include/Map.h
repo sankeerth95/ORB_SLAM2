@@ -27,6 +27,7 @@
 
 #include <mutex>
 
+#include "MemoryTracker.h"
 
 
 namespace ORB_SLAM2
@@ -34,6 +35,9 @@ namespace ORB_SLAM2
 
 class MapPoint;
 class KeyFrame;
+
+typedef std::set<MapPoint*, std::less<MapPoint*>, AllocationTracker::my_alloc<MapPoint*> > MapPointSet;
+typedef std::set<KeyFrame*, std::less<KeyFrame*>, AllocationTracker::my_alloc<KeyFrame*> > KeyFrameSet;
 
 class Map
 {
@@ -67,8 +71,8 @@ public:
     std::mutex mMutexPointCreation;
 
 protected:
-    std::set<MapPoint*> mspMapPoints;
-    std::set<KeyFrame*> mspKeyFrames;
+    MapPointSet mspMapPoints;
+    KeyFrameSet mspKeyFrames;
 
     std::vector<MapPoint*> mvpReferenceMapPoints;
 

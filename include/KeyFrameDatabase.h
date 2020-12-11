@@ -38,6 +38,9 @@ namespace ORB_SLAM2
 class KeyFrame;
 class Frame;
 
+//typedef list<KeyFrame*, AllocationTracker::my_alloc<KeyFrame*> > invertedFileList;
+typedef list<KeyFrame*> invertedFileList;
+typedef std::vector<invertedFileList> invertedFiledb;
 
 class KeyFrameDatabase
 {
@@ -63,7 +66,8 @@ protected:
   const ORBVocabulary* mpVoc;
 
   // Inverted file
-  std::vector<list<KeyFrame*> > mvInvertedFile;
+  invertedFiledb mvInvertedFile;
+      //  , AllocationTracker::my_alloc<list<KeyFrame*, AllocationTracker::my_alloc<KeyFrame*> > > > mvInvertedFile;
 
   // Mutex
   std::mutex mMutex;

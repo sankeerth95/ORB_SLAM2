@@ -5,42 +5,14 @@
 #ifndef ORB_SLAM2_MEMORYTRACKER_H
 #define ORB_SLAM2_MEMORYTRACKER_H
 
-#include <iostream>
 #include <memory>
-#include <thread>
-#include <chrono>
-#include <mutex>
 #include <fstream>
+#include <thread>
+#include <mutex>
+#include <limits>
 
-
-namespace AllocationTracker{
-
-    static std::mutex allocation_lock;
-
-    struct AllocationStats{
-        size_t bytesAllocated = 0;
-        size_t bytesFreed = 0;
-        size_t heapComponent() {
-            allocation_lock.lock();
-            size_t netBytes = bytesAllocated - bytesFreed;
-            allocation_lock.unlock();
-            return netBytes;
-        }
-    };
-
-    static AllocationStats memStats;
-
-    static void PrintMemoryStats(){
-        std::cout << "allocation: " << memStats.bytesAllocated << "\n";
-        std::cout << "freed: " << memStats.bytesFreed << "\n";
-        std::cout << "usage: " << memStats.heapComponent() << "\n" << std::endl;
-    }
-
-    static size_t WriteMemoryStats(){
-        return memStats.heapComponent();
-    }
-}
-
+#define DONOTREDEFINENEW
+#ifndef DONOTREDEFINENEW
 void* operator new(size_t size){
     AllocationTracker::allocation_lock.lock();
     AllocationTracker::memStats.bytesAllocated += size;
@@ -60,6 +32,53 @@ void operator delete(void* ptr){
     free(p2);
     AllocationTracker::allocation_lock.unlock();
 }
+#endif //DONTREDEFINENEW
+
+namespace AllocationTracker{
+
+    struct AllocationStats{
+        size_t bytesAllocated = 0;
+        size_t bytesFreed = 0;
+    }; 
+
+    void UpdateAlloc(size_t i);
+
+    void UpdateFree(size_t i);
+
+    size_t getNetComponent();
+
+    template<typename T>
+    struct my_alloc {
+
+        typedef T value_type;
+
+        my_alloc() = default;
+        template <class U> constexpr my_alloc (const my_alloc <U>&) noexcept {}
+
+        [[nodiscard]] T* allocate(std::size_t n){
+            if (n > std::numeric_limits<std::size_t>::max() / sizeof(T))
+                throw std::bad_alloc();
+
+            if (auto p = static_cast<T*>(std::malloc(n*sizeof(T)))) {
+                UpdateAlloc(sizeof(T)*n);
+                return p;
+            }
+
+            throw std::bad_alloc();
+        }
+
+        void deallocate(T* p, std::size_t n) noexcept{
+            UpdateFree(sizeof(T)*n);
+            std::free(p);
+        }
+    };
+}
+
+
+template <class T, class U>
+bool operator==(const AllocationTracker::my_alloc <T>&, const AllocationTracker::my_alloc <U>&) { return true; }
+template <class T, class U>
+bool operator!=(const AllocationTracker::my_alloc <T>&, const AllocationTracker::my_alloc <U>&) { return false; }
 
 
 class PublishThread{
@@ -70,59 +89,24 @@ class PublishThread{
     std::mutex mtx;
 
 public:
-    PublishThread(size_t(*f)(), std::string filename):getnum(f), ofs(filename){
-    };
+    PublishThread(size_t(*f)(), const std::string& filename);
 
-    void WriteBytes() {
-        while (true) {
-            mtx.lock();
-            bool stop_now = stop_thread;
-            size_t x = getnum();
-            mtx.unlock();
-            ofs << x << "\n";
-            ofs.flush();
-            if(stop_now) break;
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        }
-    }
+    void WriteBytes();
 
-    void BeginSession(){
-        stop_thread = false;
-        mtx.unlock();
-        t = new std::thread(&PublishThread::WriteBytes, this);
-    }
+    void BeginSession();
 
-    void EndSession(){
-        mtx.lock();
-        stop_thread = true;
-        mtx.unlock();
-        t->join();
-    }
+    void EndSession();
 
-    static PublishThread& Get(std::string sess="stat.txt"){
-        static PublishThread m(&AllocationTracker::WriteMemoryStats, sess);
-        return m;
-    }
+    static PublishThread& Get(std::string sess="stat.txt");
 };
 
-
+//SimpleMemtracker.....
 class MemTracker{
     size_t tracked_bytes = 0;
     std::mutex mtx;
 public:
-    void UpdateBytes(size_t size){
-        mtx.lock();
-        tracked_bytes += size;
-        mtx.unlock();
-    }
-
-    size_t GetTrackedBytes(){
-        mtx.lock();
-        size_t bytes_recorded = tracked_bytes;
-        mtx.unlock();
-        return bytes_recorded;
-    }
-
+    void UpdateBytes(size_t size);
+    size_t GetTrackedBytes();
 };
 
 //#define MEMTRACK
